@@ -5,7 +5,7 @@
 #define GAME_H
 
 #include "view.h"
-#include "model.h"
+#include "controller.h"
 #include "move.h"
 
 #include <QObject>
@@ -26,7 +26,7 @@ public:
         QObject::connect(&model, SIGNAL(canUndoStateChanged(bool)), &view, SLOT(onCanUndoStateChanged(bool)));
         QObject::connect(&model, SIGNAL(canRedoStateChanged(bool)), &view, SLOT(onCanRedoStateChanged(bool)));
 
-        QObject::connect(&model, SIGNAL(modelLoaded(const Model*)), &view, SLOT(onModelLoaded(const Model*)));
+        QObject::connect(&model, SIGNAL(modelLoaded(const Controller*)), &view, SLOT(onModelLoaded(const Controller*)));
 
         QObject::connect(&model, SIGNAL(syncMove(const Move &)), &view,  SLOT(applyMove(const Move &)));
         QObject::connect(&view,  SIGNAL(syncMove(const Move &)), &model, SLOT(applyMove(const Move &)));
@@ -52,7 +52,7 @@ public:
 
 private:
     View view;
-    Model model;
+    Controller model;
 };
 
 #endif // GAME_H

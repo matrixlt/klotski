@@ -23,10 +23,11 @@ HEADERS += common.h \
            game.h \
            graphicspiece.h \
            matrix.h \
-           model.h \
            move.h \
            piece.h \
-           view.h
+           view.h \
+    controller.h
 FORMS += view.ui
-SOURCES += common.cpp graphicspiece.cpp main.cpp model.cpp view.cpp
+SOURCES += common.cpp graphicspiece.cpp main.cpp view.cpp \
+    controller.cpp
 RESOURCES += resources.qrc

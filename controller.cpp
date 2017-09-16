@@ -1,4 +1,4 @@
-#include "model.h"
+#include "controller.h"
 #include "common.h"
 #include "matrix.h"
 
@@ -7,27 +7,27 @@
 #include <QFile>
 #include <QTextStream>
 
-Model::Model(QObject *parent) : QObject(parent) {
+Controller::Controller(QObject *parent) : QObject(parent) {
     load(QString(":/resources/levels/QiBuChengShi.klotski"));
     // Wait for reload
 }
-const std::vector<Piece> &Model::pieces() const {
+const std::vector<Piece> &Controller::pieces() const {
     return pieces_;
 }
-const std::vector<Move> &Model::validMoves() const {
+const std::vector<Move> &Controller::validMoves() const {
     return valid_moves_;
 }
-int Model::stepCount() const {
+int Controller::stepCount() const {
     return step_count_;
 }
-int Model::bestStepCount() const {
+int Controller::bestStepCount() const {
     return best_step_count_;
 }
-const QString &Model::levelName() const {
+const QString &Controller::levelName() const {
     return level_name_;
 }
 
-void Model::onSave(const QString & file_name){
+void Controller::onSave(const QString & file_name){
     QFile file(file_name);
     if (file.open(QIODevice::WriteOnly)) {
         QTextStream stream(&file);
@@ -44,11 +44,11 @@ void Model::onSave(const QString & file_name){
         emit modelSaved(false);
 
 }
-void Model::onLoad(const QString & file_name){
+void Controller::onLoad(const QString & file_name){
     load(file_name);
     onReload();
 }
-void Model::onReload() {
+void Controller::onReload() {
     qDebug() << "Model::onReload";
     pieces_ = original_pieces_;
     history_.clear();
@@ -59,7 +59,7 @@ void Model::onReload() {
     emit modelLoaded(this);
     updateValidMoves();
 }
-void Model::load(const QString & file_name) {
+void Controller::load(const QString & file_name) {
     qDebug() << "Start Load";
     QFile file(file_name);
     if(file.open(QIODevice::ReadOnly))
@@ -83,7 +83,7 @@ void Model::load(const QString & file_name) {
     }
 }
 
-void Model::applyMove(const Move &move) {
+void Controller::applyMove(const Move &move) {
     static std::size_t emitted = 0;
     if (move.id() != emitted) {
         emitted = move.id();
@@ -119,14 +119,14 @@ void Model::applyMove(const Move &move) {
         qDebug() << "Move" << &move << "required on Model but have be down";
     }
 }
-void Model::onUndo() {
+void Controller::onUndo() {
     applyMove(history_[last_move_].reverse());
 }
-void Model::onRedo() {
+void Controller::onRedo() {
     applyMove(history_[last_move_ + 1]);
 }
 
-void Model::updateValidMoves() {
+void Controller::updateValidMoves() {
     valid_moves_.clear();
 
     Matrix<int> matrix(kHorizontalUnit, kVerticalUnit);
@@ -233,10 +233,10 @@ void Model::updateValidMoves() {
     }
     emit validMovesChanged(valid_moves_);
 }
-void Model::updateCanWinState() {
+void Controller::updateCanWinState() {
     emit canWinStateChanged(pieces_[kWinPieceIndex].position() == kWinPosition);
 }
-void Model::updateCanUndoRedoState() {
+void Controller::updateCanUndoRedoState() {
     bool can_undo = false, can_redo = false;
     if (last_move_ != -1) {
         can_undo = true;
@@ -248,15 +248,15 @@ void Model::updateCanUndoRedoState() {
     emit canRedoStateChanged(can_redo);
 }
 
-void Model::incStepCount() {
+void Controller::incStepCount() {
     emit stepCountChanged(++step_count_);
     qDebug() << "Step Count Changed emitted" << step_count_;
 }
-void Model::decStepCount() {
+void Controller::decStepCount() {
     emit stepCountChanged(--step_count_);
     qDebug() << "Step Count Changed emitted" << step_count_;
 }
-void Model::setStepCount(int step_count) {
+void Controller::setStepCount(int step_count) {
     step_count_ = step_count;
     emit stepCountChanged(step_count_);
     qDebug() << "Step Count Changed emitted" << step_count_;

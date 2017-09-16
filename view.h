@@ -4,7 +4,7 @@
 #ifndef VIEW_H
 #define VIEW_H
 
-#include "model.h"
+#include "controller.h"
 #include "move.h"
 #include "graphicspiece.h"
 
@@ -60,7 +60,7 @@ public slots:
     /* on model loaded
      * reload every data about model(mostly graphics pieces)
      */
-    void onModelLoaded(const Model *model);
+    void onModelLoaded(const Controller *model);
 
 signals:
     /* forward graphics pieces' syncMove signal */
@@ -108,7 +108,7 @@ private:
     std::vector<GraphicsPiece *> graphics_pieces_;
 
 private:
-    const Model *model_;
+    const Controller *model_;
 };
 
 #endif // VIEW_H

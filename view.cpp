@@ -65,7 +65,7 @@ void View::onCanRedoStateChanged(bool can_redo) {
     ui->actionRedo->setEnabled(can_redo);
 }
 
-void View::onModelLoaded(const Model *model) {
+void View::onModelLoaded(const Controller *model) {
     qDebug() << "View::onModelLoaded" << model;
     model_ = model;
     scene_->clear();
