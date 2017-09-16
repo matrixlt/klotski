@@ -103,7 +103,6 @@ private slots:
 private:
     /* UI */
     Ui::View *ui;
-    QLabel *step_info_;
     QGraphicsScene *scene_;
 
     std::vector<GraphicsPiece *> graphics_pieces_;

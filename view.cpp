@@ -16,16 +16,12 @@ const double View::kFinishButtonHorizontalUnit = 2;
 
 View::View(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::View),
-    step_info_(nullptr)
+    ui(new Ui::View)
 {
     ui->setupUi(this);
 
     this->setStyleSheet("* { font-size: 13px; }");
     ui->statusBar->setStyleSheet("#statusBar { border-top: 2px dashed rgb(220, 220, 220); } * { font-weight:bold; }");
-    step_info_ = new QLabel(ui->statusBar);
-    step_info_->setObjectName("step_info_");
-    ui->statusBar->addPermanentWidget(step_info_);
 
     scene_ = new QGraphicsScene(ui->graphicsView);
     ui->graphicsView->setScene(scene_);
@@ -52,12 +48,12 @@ View::~View()
 
 void View::updateStepCount(int step_count) {
     if (step_count <= model_->bestStepCount())
-        step_info_->setStyleSheet("color: rgb(0, 170, 0);");
+        ui->labelStepInfo->setStyleSheet("color: rgb(0, 170, 0);");
     else {
-        step_info_->setStyleSheet("color: rgb(170, 0, 0);");
+        ui->labelStepInfo->setStyleSheet("color: rgb(170, 0, 0);");
     }
-    step_info_->setText(tr("%1 / %2 steps").arg(step_count).arg(model_->bestStepCount()));
-    qDebug() << "Step Info label changed" << step_info_->text();
+    ui->labelStepInfo->setText(tr("%1/%2<span style=\"font-size: 11px;\">steps</span>").arg(step_count).arg(model_->bestStepCount()));
+    qDebug() << "Step Info label changed" << ui->labelStepInfo->text();
 }
 void View::onCanWinStateChanged(bool can_win) {
     ui->pushButtonFinish->setEnabled(can_win);
