@@ -15,6 +15,9 @@
 #include <QList>
 #include <QUrl>
 #include <QDesktopServices>
+#include <QInputDialog>
+#include <QLineEdit>
+#include <numeric>
 
 const double View::kFinishButtonVerticalUnit = 0.5;
 const double View::kFinishButtonHorizontalUnit = 2;
@@ -52,6 +55,8 @@ View::View(QWidget *parent) :
 
     connect(ui->actionShow_Statusbar, &QAction::triggered, ui->statusBar,&QToolBar::setVisible);
     connect(ui->actionShow_Toolbar, &QAction::triggered, ui->toolBar, &QToolBar::setVisible);
+    connect(ui->actionShow_Dock_Information, &QAction::toggled, ui->dockWidgetGameInfo, &QDockWidget::setVisible);
+    connect(ui->dockWidgetGameInfo, &QDockWidget::visibilityChanged, ui->actionShow_Dock_Information, &QAction::setChecked);
 
     connect(ui->actionOpen, &QAction::triggered, this, &View::promoteToOpenFile);
     connect(ui->actionSave, &QAction::triggered, this, &View::promoteToSaveFile);
@@ -65,6 +70,7 @@ View::View(QWidget *parent) :
     connect(ui->actionKlotski_Handbook, &QAction::triggered, this, &View::showHandbook);
 
     connect(ui->actionQuit, &QAction::triggered, this, &View::close);
+
     qDebug() << "Resize View at View created";
     resizeView();
 }
@@ -124,7 +130,7 @@ void View::updatePieces(const std::vector<Piece> &pieces) {
     }
     scene_->clear();
     graphics_pieces_.clear();
-    int size = pieces.size();
+    int size = static_cast<int>(pieces.size());
     for (int i = 0; i < size; ++i) {
         GraphicsPiece *graphics_piece = new GraphicsPiece(i, pieces[i]);
         graphics_pieces_.push_back(graphics_piece);
@@ -185,6 +191,7 @@ void View::updateValidMoves(const std::vector<Move> &valid_moves) {
 void View::updateLevelName(const QString &level_name) {
     level_name_ = level_name;
     this->setWindowTitle(tr("Klotski - %1").arg(level_name_));
+    ui->labelLevelName->setText(level_name_);
 }
 void View::updateFileName(const QString &file_name) {
     qDebug() << "update file name to" << file_name;
@@ -407,6 +414,8 @@ void View::onLoadOptimalSolution() {
     QFileInfo file_info(file_name_);
     qDebug() << "load file" << kDefaultSolutionDir + "/" + file_info.fileName();
     loadFile(kDefaultSolutionDir + "/" + file_info.fileName());
+    userSelectedHistory(ui->historyView->model()->rowCount() - 1);
+    ui->statusBar->showMessage(tr("Optimal solution loaded"));
 }
 
 void View::showHandbook() {
@@ -418,14 +427,28 @@ void View::showHandbook() {
 void View::toggleEditMode() {
     if (edit_mode_) {
         edit_mode_ = false;
+        ui->statusBar->showMessage(tr("Edit mode closed"));
     } else {
         edit_mode_ = true;
+        ui->statusBar->showMessage(tr("Edit mode entered"));
     }
     for (GraphicsPiece *graphics_piece : graphics_pieces_) {
         graphics_piece->setEditMode(edit_mode_);
         graphics_piece->clearValidMoveDirection();
     }
     if (!edit_mode_) {
-        emit editModeExited();
+        bool is_ok;
+        QString level_name;
+        int best_step_count;
+        do {
+            level_name = QInputDialog::getText(this, "Edit Mode",
+                "Please enter level name", QLineEdit::Normal, QString(), &is_ok);
+        } while(!is_ok);
+        do {
+            best_step_count = QInputDialog::getInt(this, "Edit Mode", "Please enter best step count",
+                0, 0, std::numeric_limits<int>::max(), 1, &is_ok);
+        } while(!is_ok);
+        emit editModeExited(level_name, best_step_count);
+        emit promoteToSaveFile();
     }
 }

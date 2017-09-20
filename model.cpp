@@ -137,9 +137,10 @@ void Model::onPieceRotated(int index) {
     qDebug() << "[EMIT] updateValidMoves()";
     updateValidMoves(); // auto emitted
 }
-void Model::onEditModeExited() {
+void Model::onEditModeExited(const QString &new_level_name, int new_best_step_count) {
     original_pieces_ = pieces_;
-
+    level_name_ = new_level_name;
+    best_step_count_ = new_best_step_count;
     onReset();
 }
 
@@ -165,7 +166,7 @@ void Model::applyMove(const Move &move) {
         if (current_move_index_ != -1 && move == history_model_[current_move_index_].second.reverse()) {
             // Undo
             decCurrentMoveIndex();
-            if (history_model_[current_move_index_].second.index() != history_model_[current_move_index_ + 1].second.index())
+            if (current_move_index_ == -1 || history_model_[current_move_index_].second.index() != history_model_[current_move_index_ + 1].second.index())
                 // current_move_index_ has been decreased
                 decStepCount();
         } else {
