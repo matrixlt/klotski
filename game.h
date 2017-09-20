@@ -64,8 +64,9 @@ public:
     void start() {
         connect();
         view->refresh();
-//        view->forceResize();
+ //       view->forceResize();
         view->show();
+         view->forceResize();
     }
 
 private slots:
